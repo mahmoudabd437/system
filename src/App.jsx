@@ -303,27 +303,39 @@ function LoginPage() {
     setLoading(true);
     setError('');
 
-    try {
-      const data = await apiRequest('/auth/login/', {
-        method: 'POST',
-        body: JSON.stringify(form),
-        headers: { 'Content-Type': 'application/json' },
-      });
-      login(data);
-      navigate('/dashboard');
-    } catch {
-      setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-    } finally {
-      setLoading(false);
-    }
+    // محاكاة تأخير بسيط للشبكة لتبدو العملية واقعية أثناء الفحص والتجريب
+    setTimeout(() => {
+      try {
+        // بيانات مستخدم تجريبي يتم قبولها وتخطي الـ API
+        const mockData = {
+          access: 'mocked_access_token_for_testing',
+          refresh: 'mocked_refresh_token_for_testing',
+          user: {
+            id: 999,
+            username: form.identifier || 'test_user',
+            email: form.identifier || 'test@school.com',
+            first_name: 'أحمد',
+            last_name: 'إسماعيل',
+            role: 'admin', // يمكنك تغيير الدور الافتراضي للتجربة (admin, teacher, employee, affairs)
+          },
+        };
+
+        login(mockData);
+        navigate('/dashboard');
+      } catch (err) {
+        setError('حدث خطأ أثناء تسجيل الدخول التجريبي');
+      } finally {
+        setLoading(false);
+      }
+    }, 600); // 600ms تأخير
   };
 
   return (
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-brand">نظام إدارة المدرسة</div>
-        <h1>تسجيل الدخول</h1>
-        <p>ادخل إلى لوحة التحكم باستخدام البريد الإلكتروني وكلمة المرور.</p>
+        <h1>تسجيل الدخول (وضع التجريب)</h1>
+        <p>ادخل أي بريد إلكتروني وكلمة مرور لتخطي الدخول والتجربة.</p>
         <form onSubmit={submit} className="auth-form">
           <label>
             البريد الإلكتروني
@@ -335,7 +347,7 @@ function LoginPage() {
           </label>
           {error ? <div className="form-error">{error}</div> : null}
           <button type="submit" className="primary-btn" disabled={loading}>
-            {loading ? 'جاري الدخول...' : 'دخول'}
+            {loading ? 'جاري الدخول...' : 'دخول مباشر'}
           </button>
         </form>
         <Link to="/signup" className="auth-link">
