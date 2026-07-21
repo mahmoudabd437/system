@@ -1,93 +1,80 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
-const TOKEN_KEY = "dar_bidaya_token";
+import React, { useState } from "react";
+import Sidebar from "./components/Sidebar";
+import AuthPage from "./components/AuthPage";
+import DashboardPage from "./pages/DashboardPage";
+import StagesPage from "./pages/StagesPage";
+import TopNavbar from "./components/TopNavbar";
 
-export function getStoredToken() {
-  return localStorage.getItem(TOKEN_KEY);
-}
+export default function App() {
+  const [activePage, setActivePage] = useState("dashboard");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-export function setStoredToken(token) {
-  localStorage.setItem(TOKEN_KEY, token);
-}
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem("token");
+  });
 
-export function clearStoredToken() {
-  localStorage.removeItem(TOKEN_KEY);
-}
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
 
-async function request(path, options = {}) {
-  const token = options.token || getStoredToken();
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
+  const handleAuthSuccess = (authToken, authUser) => {
+    localStorage.setItem("token", authToken);
+    localStorage.setItem("user", JSON.stringify(authUser));
+
+    setToken(authToken);
+    setUser(authUser);
+    setActivePage("dashboard");
   };
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    setToken(null);
+    setUser(null);
+  };
+
+  if (!token || !user) {
+    return <AuthPage onAuthSuccess={handleAuthSuccess} />;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
+  return (
+    <div className="app-shell">
+      <div className="ambient ambient-a" />
+      <div className="ambient ambient-b" />
 
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || `Request failed: ${response.status}`);
-  }
+      <Sidebar
+        activePage={activePage}
+        onNavigate={setActivePage}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={() =>
+          setSidebarCollapsed((current) => !current)
+        }
+        onLogout={handleLogout}
+        user={user}
+      />
 
-  if (response.status === 204) return null;
-  return response.json();
-}
+      <main
+        className={`main-stage ${
+          sidebarCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
+        <TopNavbar
+          user={user}
+          pageTitle={
+            activePage === "stages"
+              ? "المراحل الدراسية"
+              : "الرئيسية"
+          }
+        />
 
-export function signup(payload) {
-  return request("/auth/signup", {
-    method: "POST",
-    body: JSON.stringify(payload),
-    token: null,
-  });
-}
-
-export function login(payload) {
-  return request("/auth/login", {
-    method: "POST",
-    body: JSON.stringify(payload),
-    token: null,
-  });
-}
-
-export function getMe() {
-  return request("/me");
-}
-
-export function getDashboardSummary() {
-  return request("/dashboard/summary");
-}
-
-export function getStages() {
-  return request("/stages/");
-}
-
-export function createStage(payload) {
-  return request("/stages/", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateStage(id, payload) {
-  return request(`/stages/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function deleteStage(id) {
-  return request(`/stages/${id}`, { method: "DELETE" });
-}
-
-export function getLatePayments() {
-  return request("/late-payments/");
-}
-
-export function getStudents() {
-  return request("/students/");
+        {activePage === "stages" ? (
+          <StagesPage user={user} />
+        ) : (
+          <DashboardPage user={user} />
+        )}
+      </main>
+    </div>
+  );
 }
