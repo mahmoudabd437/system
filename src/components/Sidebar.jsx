@@ -9,7 +9,7 @@ const navItems = [
 
 export default function Sidebar({ activePage, onNavigate, collapsed, onToggleCollapsed, onLogout, user }) {
   return (
-    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`} style={{ zIndex: -1000 }}>
       <div className="sidebar-top">
         <div className="brand-pill">
           <div className="brand-mark">DB</div>
