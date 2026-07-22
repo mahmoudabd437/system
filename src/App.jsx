@@ -22,13 +22,13 @@ import StudentsPage from './pages/StudentsPage';
 import SubjectsPage from './pages/SubjectsPage';
 import UsersPage from './pages/UsersPage';
 
-// function ShellPage({ children }) {
-//   return (
-//     <ProtectedRoute>
-//       <AppShell>{children}</AppShell>
-//     </ProtectedRoute>
-//   );
-// }
+function ShellPage({ children }) {
+  return (
+    <ProtectedRoute>
+      <AppShell>{children}</AppShell>
+    </ProtectedRoute>
+  );
+}
 
 function AppRoutes() {
   return (
@@ -39,9 +39,9 @@ function AppRoutes() {
       <Route
         path="/dashboard"
         element={
-          {/* <ShellPage> */}
+          <ShellPage> 
             <DashboardPage />
-        {/*</ShellPage>*/}
+        </ShellPage>
         }
       />
       <Route
