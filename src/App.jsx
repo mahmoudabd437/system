@@ -1,80 +1,173 @@
-import React, { useState } from "react";
-import Sidebar from "./components/Sidebar";
-import AuthPage from "./components/AuthPage";
-import DashboardPage from "./pages/DashboardPage";
-import StagesPage from "./pages/StagesPage";
-import TopNavbar from "./components/TopNavbar";
+import React from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import AppShell from './components/AppShell';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
+import { SettingsProvider } from './context/SettingsContext';
+import AcademicStagesPage from './pages/AcademicStagesPage';
+import AttendancePage from './pages/AttendancePage';
+import BackupPage from './pages/BackupPage';
+import BookingsPage from './pages/BookingsPage';
+import DashboardPage from './pages/DashboardPage';
+import ExamsPage from './pages/ExamsPage';
+import ExpensesPage from './pages/ExpensesPage';
+import GroupsPage from './pages/GroupsPage';
+import InventoryPage from './pages/InventoryPage';
+import LoginPage from './pages/LoginPage';
+import PaymentsPage from './pages/PaymentsPage';
+import ReportsPage from './pages/ReportsPage';
+import SalariesPage from './pages/SalariesPage';
+import SignupPage from './pages/SignupPage';
+import StudentsPage from './pages/StudentsPage';
+import SubjectsPage from './pages/SubjectsPage';
+import UsersPage from './pages/UsersPage';
+
+function ShellPage({ children }) {
+  return (
+    <ProtectedRoute>
+      <AppShell>{children}</AppShell>
+    </ProtectedRoute>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ShellPage>
+            <DashboardPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/stages"
+        element={
+          <ShellPage>
+            <AcademicStagesPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/subjects"
+        element={
+          <ShellPage>
+            <SubjectsPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/groups"
+        element={
+          <ShellPage>
+            <GroupsPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/students"
+        element={
+          <ShellPage>
+            <StudentsPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/bookings"
+        element={
+          <ShellPage>
+            <BookingsPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/attendance"
+        element={
+          <ShellPage>
+            <AttendancePage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/payments"
+        element={
+          <ShellPage>
+            <PaymentsPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/salaries"
+        element={
+          <ShellPage>
+            <SalariesPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/exams"
+        element={
+          <ShellPage>
+            <ExamsPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/expenses"
+        element={
+          <ShellPage>
+            <ExpensesPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/inventory"
+        element={
+          <ShellPage>
+            <InventoryPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <ShellPage>
+            <ReportsPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <ShellPage>
+            <UsersPage />
+          </ShellPage>
+        }
+      />
+      <Route
+        path="/backup"
+        element={
+          <ShellPage>
+            <BackupPage />
+          </ShellPage>
+        }
+      />
+    </Routes>
+  );
+}
 
 export default function App() {
-  const [activePage, setActivePage] = useState("dashboard");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  const [token, setToken] = useState(() => {
-    return localStorage.getItem("token");
-  });
-
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  const handleAuthSuccess = (authToken, authUser) => {
-    localStorage.setItem("token", authToken);
-    localStorage.setItem("user", JSON.stringify(authUser));
-
-    setToken(authToken);
-    setUser(authUser);
-    setActivePage("dashboard");
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    setToken(null);
-    setUser(null);
-  };
-
-  if (!token || !user) {
-    return <AuthPage onAuthSuccess={handleAuthSuccess} />;
-  }
-
   return (
-    <div className="app-shell">
-      <div className="ambient ambient-a" />
-      <div className="ambient ambient-b" />
-
-      <Sidebar
-        activePage={activePage}
-        onNavigate={setActivePage}
-        collapsed={sidebarCollapsed}
-        onToggleCollapsed={() =>
-          setSidebarCollapsed((current) => !current)
-        }
-        onLogout={handleLogout}
-        user={user}
-      />
-
-      <main
-        className={`main-stage ${
-          sidebarCollapsed ? "sidebar-collapsed" : ""
-        }`}
-      >
-        <TopNavbar
-          user={user}
-          pageTitle={
-            activePage === "stages"
-              ? "المراحل الدراسية"
-              : "الرئيسية"
-          }
-        />
-
-        {activePage === "stages" ? (
-          <StagesPage user={user} />
-        ) : (
-          <DashboardPage user={user} />
-        )}
-      </main>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <SettingsProvider>
+          <AppRoutes />
+        </SettingsProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
