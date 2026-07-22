@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import AppShell from './components/AppShell';
-import ProtectedRoute from './components/ProtectedRoute';
+// تم إلغاء استيراد ProtectedRoute مؤقتاً للتست
 import { AuthProvider } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import AcademicStagesPage from './pages/AcademicStagesPage';
@@ -22,26 +22,24 @@ import StudentsPage from './pages/StudentsPage';
 import SubjectsPage from './pages/SubjectsPage';
 import UsersPage from './pages/UsersPage';
 
+// 1. شلنا <ProtectedRoute> علشان يفتح الصفحات على طول
 function ShellPage({ children }) {
-  return (
-    <ProtectedRoute>
-      <AppShell>{children}</AppShell>
-    </ProtectedRoute>
-  );
+  return <AppShell>{children}</AppShell>;
 }
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* 2. خلينا المسار الرئيسي يحول على Dashboard بدل Login */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route
         path="/dashboard"
         element={
-          <ShellPage> 
+          <ShellPage>
             <DashboardPage />
-        </ShellPage>
+          </ShellPage>
         }
       />
       <Route
